@@ -5,11 +5,15 @@ class Cell {
     this.x = x;
     this.y = y;
     this.id = id;
+
+    this.vec = createVector(x,y);
   }
   
   move(x,y) {
     this.x = x;
     this.y = y;
+    this.vec.x = x;
+    this.vec.y = y;
   }
   
   draw() {
