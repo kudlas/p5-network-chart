@@ -14,10 +14,10 @@ class Chart {
     }
 
     setActiveCells(cells) {
-        this.cells.map( (cell) => cell.setActive(false) );
+        this.cells.map((cell) => cell.setActive(false));
 
         // make them active, plus set their move offset
-        cells?.map( cell => {
+        cells?.map(cell => {
             cell.setActive(true);
             cell.setMoveOffset(mouseX, mouseY);
         });
@@ -29,8 +29,7 @@ class Chart {
 
         if (!this.cells.hasOwnProperty(id)) {
             this.cells[id] = new Cell(x, y, id);
-        }
-        else {
+        } else {
             console.error("Cell with id: " + id + " already exists.");
         }
     }
@@ -48,21 +47,35 @@ class Chart {
 
     clicked() {
         // if there is more than one, screw tha whole clicking thing
-        if(this.multiMode) return;
+        /*if (this.multiMode) {
+            this.activeCells.map(cell => cell.setMoveOffset(mouseX, mouseY));
+            return;
+        }*/
 
 
         // start selection rect
-        this.sRect.setStart(mouseX,mouseY);
+        this.sRect.setStart(mouseX, mouseY);
 
         // is cell clicked / select clicked cell
-        this.cells.some((cell) => {
+        const cellClicked = this.cells.some((cell) => {
             if (cell.isPointWithin(mouseX, mouseY)) {
-                this.setActiveCells([cell]);
-                return cell;
+                if (this.multiMode) {
+                    this.activeCells.map(cell => cell.setMoveOffset(mouseX, mouseY));
+                } else {
+                    this.setActiveCells([cell]);
+                }
+                    return cell;
             } else {
-                this.setActiveCells(null);
+                 if (!this.multiMode)
+                    this.setActiveCells(null);
             }
         });
+
+        // deselect in multimode
+        if(this.multiMode && !cellClicked) {
+            this.multiMode=false;
+            this.setActiveCells(null);
+        }
 
         // is edge clicked
         this.edges.some((edge) => {
@@ -77,20 +90,22 @@ class Chart {
 
         // just some rectangle selection stuff
         this.isDraggin = false;
-        if(!this.drawingRect) { this.drawingRect = false; return;}
+        if (!this.drawingRect) {
+            this.drawingRect = false;
+            return;
+        }
         this.drawingRect = false;
 
         // is cell in selection bounds
         const bounds = this.sRect.getCoords();
-        const chosenCells = this.cells.filter( ( cell ) => {
+        const chosenCells = this.cells.filter((cell) => {
 
             const {x, y} = cell;
-            const {start, end} = bounds;
-            const sortF = (a,b) => a-b;
+            const sortF = (a, b) => a - b;
 
             // sort them to enable backdragging
-            const xCoords = [start.x, mouseX].sort(sortF);
-            const yCoords = [start.y, mouseY].sort(sortF);
+            const xCoords = [bounds.start.x, mouseX].sort(sortF);
+            const yCoords = [bounds.start.y, mouseY].sort(sortF);
 
             const sameRow = x > xCoords[0] && x < xCoords[1];
             const sameCol = y > yCoords[0] && y < yCoords[1];
@@ -99,7 +114,7 @@ class Chart {
 
         }, this);
 
-        if(chosenCells.length > 1) this.multiMode=true;
+        if (chosenCells.length > 1) this.multiMode = true;
 
         this.setActiveCells(chosenCells);
         console.log("now I will check what is selected", this.activeCells);
@@ -111,7 +126,7 @@ class Chart {
 
         // moving/dragging cells
         if (this.activeCells !== null) {
-            this.activeCells.map( (obj) => obj.move(mouseX, mouseY), this );
+            this.activeCells.map((obj) => obj.move(mouseX, mouseY), this);
             return;
         }
 
@@ -120,7 +135,7 @@ class Chart {
         this.drawingRect = true;
 
         // selection rectangle
-        this.sRect.setEnd(mouseX,mouseY)
+        this.sRect.setEnd(mouseX, mouseY)
 
     }
 
@@ -140,7 +155,7 @@ class Chart {
         this.cells.map(c => c.draw());
 
         // draw selection rectangle
-        if(this.drawingRect) {
+        if (this.drawingRect) {
             this.sRect.draw();
         }
 
