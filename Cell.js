@@ -9,13 +9,29 @@ class Cell {
     this.vec = createVector(x,y);
 
     this.isActive = false;
+
+    this.offset = createVector(0,0);
+  }
+
+  setMoveOffset(fromX, fromY) {
+    const diffX = (fromX - this.x) * (-1);
+    const diffY = (fromY - this.y) * (-1);
+
+    this.offset = createVector(diffX, diffY);
   }
   
   move(x,y) {
-    this.x = x;
-    this.y = y;
-    this.vec.x = x;
-    this.vec.y = y;
+    this.x = x + this.offset.x;
+    this.y = y + this.offset.y;
+    this.vec.x = x + this.offset.x;
+    this.vec.y = y + this.offset.y;
+  }
+
+  isPointWithin(px,py) {
+    const r = this.d / 2;
+    const dista = dist(this.x, this.y, px,py);
+
+    return (dista < r);
   }
 
   setActive(active) {
